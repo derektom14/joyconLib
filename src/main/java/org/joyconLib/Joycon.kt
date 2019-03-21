@@ -7,7 +7,6 @@ package org.joyconLib
 
 import kotlin.io.println
 import java.io.IOException
-import java.util.HashMap
 import purejavahidapi.DeviceRemovalListener
 import purejavahidapi.HidDevice
 import purejavahidapi.HidDeviceInfo
@@ -26,20 +25,15 @@ import purejavahidapi.PureJavaHidApi
  * @author goupil
  * @version 1.0
  */
-class Joycon (joyconId: Short) {
+class Joycon(joyconId: Short) {
 
     protected var j_Open: Boolean = false
     protected var j_Listener: ((JoyconEvent) -> Unit)? = null
     private var joyconInfo: HidDeviceInfo? = null
     private var joycon: HidDevice? = null
-    private var leftTranslator: LeftTranslator? = null
-    private var rightTranslator: RightTranslator? = null
+    private var translator: JoyconTranslator? = null
     private var calculator: JoyconStickCalc? = null
     private val factory_stick_cal = IntArray(18)
-    private val stick_cal_x_l = IntArray(3)
-    private val stick_cal_y_l = IntArray(3)
-    private val stick_cal_x_r = IntArray(3)
-    private val stick_cal_y_r = IntArray(3)
 
     init {
         if (joyconId == JoyconConstant.JOYCON_LEFT || joyconId == JoyconConstant.JOYCON_RIGHT) {
@@ -81,8 +75,12 @@ class Joycon (joyconId: Short) {
         joycon = null
         val calculator = JoyconStickCalc()
         this.calculator = calculator
-        leftTranslator = LeftTranslator(calculator, stick_cal_x_l, stick_cal_y_l)
-        rightTranslator = RightTranslator(calculator, stick_cal_x_r, stick_cal_y_r)
+        val type = when (joyconId) {
+            JoyconConstant.JOYCON_LEFT -> JoyconType.LEFT
+            JoyconConstant.JOYCON_RIGHT -> JoyconType.RIGHT
+            else -> throw IllegalArgumentException()
+        }
+        translator = JoyconTranslator(type, calculator)
         println("Listing Hid devices...")
         val list = PureJavaHidApi.enumerateDevices()
         for (info in list) {
@@ -199,23 +197,11 @@ class Joycon (joyconId: Short) {
                     override fun onInputReport(source: HidDevice, id: Byte, data: ByteArray, len: Int) {
                         //Input code case
                         if (id.toInt() == 0x30) {
-                            var newInputs = HashMap<String, Boolean>()
-                            var horizontal = 0f
-                            var vertical = 0f
-                            var battery: Byte = 0
-                            if (joyconInfo!!.productId == JoyconConstant.JOYCON_LEFT) {
-                                leftTranslator!!.translate(data)
-                                newInputs = leftTranslator!!.inputs
-                                horizontal = leftTranslator!!.horizontal
-                                vertical = leftTranslator!!.vertical
-                                battery = leftTranslator!!.battery
-                            } else if (joyconInfo!!.productId == JoyconConstant.JOYCON_RIGHT) {
-                                rightTranslator!!.translate(data)
-                                newInputs = rightTranslator!!.inputs
-                                horizontal = rightTranslator!!.horizontal
-                                vertical = rightTranslator!!.vertical
-                                battery = rightTranslator!!.battery
-                            }
+                            translator!!.translate(data)
+                            val newInputs = translator!!.inputs
+                            val horizontal = translator!!.horizontal
+                            val vertical = translator!!.vertical
+                            val battery = translator!!.battery
                             if (j_Listener != null) {
                                 if (!newInputs.isEmpty() || horizontal != this.horizontal || vertical != this.vertical) {
                                     j_Listener!!(JoyconEvent(newInputs, horizontal, vertical, battery))
@@ -245,21 +231,7 @@ class Joycon (joyconId: Short) {
 
                 Thread.sleep(100)
 
-                if (joyconInfo!!.productId == JoyconConstant.JOYCON_LEFT) {
-                    stick_cal_x_l[1] = factory_stick_cal[4] shl 8 and 0xF00 or factory_stick_cal[3]
-                    stick_cal_y_l[1] = factory_stick_cal[5] shl 4 or (factory_stick_cal[4] shr 4)
-                    stick_cal_x_l[0] = stick_cal_x_l[1] - (factory_stick_cal[7] shl 8 and 0xF00 or factory_stick_cal[6])
-                    stick_cal_y_l[0] = stick_cal_y_l[1] - (factory_stick_cal[8] shl 4 or (factory_stick_cal[7] shr 4))
-                    stick_cal_x_l[2] = stick_cal_x_l[1] + (factory_stick_cal[1] shl 8 and 0xF00 or factory_stick_cal[0])
-                    stick_cal_y_l[2] = stick_cal_y_l[1] + (factory_stick_cal[2] shl 4 or (factory_stick_cal[2] shr 4))
-                } else if (joyconInfo!!.productId == JoyconConstant.JOYCON_RIGHT) {
-                    stick_cal_x_r[1] = factory_stick_cal[10] shl 8 and 0xF00 or factory_stick_cal[9]
-                    stick_cal_y_r[1] = factory_stick_cal[11] shl 4 or (factory_stick_cal[10] shr 4)
-                    stick_cal_x_r[0] = stick_cal_x_r[1] - (factory_stick_cal[13] shl 8 and 0xF00 or factory_stick_cal[12])
-                    stick_cal_y_r[0] = stick_cal_y_r[1] - (factory_stick_cal[14] shl 4 or (factory_stick_cal[13] shr 4))
-                    stick_cal_x_r[2] = stick_cal_x_r[1] + (factory_stick_cal[16] shl 8 and 0xF00 or factory_stick_cal[15])
-                    stick_cal_y_r[2] = stick_cal_y_r[1] + (factory_stick_cal[17] shl 4 or (factory_stick_cal[16] shr 4))
-                }
+                translator!!.calibrate(factory_stick_cal)
 
                 //Set to normal input mode
                 datat = ByteArray(16)

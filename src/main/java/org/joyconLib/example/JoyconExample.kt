@@ -7,8 +7,6 @@ package org.joyconLib.example
 
 import org.joyconLib.Joycon
 import org.joyconLib.JoyconConstant
-import org.joyconLib.JoyconEvent
-import org.joyconLib.JoyconListener
 
 /**
  * **The example of the JoyconLib**

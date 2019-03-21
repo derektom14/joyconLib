@@ -21,4 +21,4 @@ import java.util.HashMap
  * @version 1.0
  * @author goupil
  */
-class JoyconEvent(val newInputs: HashMap<String, Boolean>, val horizontal: Float, val vertical: Float, val battery: Byte)
+class JoyconEvent(val newInputs: Map<String, Boolean>, val horizontal: Float, val vertical: Float, val battery: Byte)
