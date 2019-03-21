@@ -44,12 +44,7 @@ class RightTranslator(private val calculator: JoyconStickCalc, private val stick
 
         val temp = IntArray(12)
         for (i in 5..11) {
-            val b = data[i]
-            if (b < 0) {
-                temp[i] = b + 256
-            } else {
-                temp[i] = b.toInt()
-            }
+            temp[i] = data[i].unsigned()
         }
         val x = temp[8] or (temp[9] and 0xF shl 8)
         val y = temp[9] shr 4 or (temp[10] shl 4)
@@ -59,24 +54,15 @@ class RightTranslator(private val calculator: JoyconStickCalc, private val stick
         vertical = calculator.vertical
 
         //Getting input change
-        var shared = data[3].toInt()
-        var right = data[2].toInt()
-        if (data[3] < 0) {
-            shared = data[3] + 256
-        }
-        if (data[2] < 0) {
-            right = data[2] + 256
-        }
+        val shared = data[3].unsigned()
+        val right = data[2].unsigned()
         val sharedByte = shared - lastShared
         lastShared = shared
         val rightByte = right - lastRight
         lastRight = right
 
         //Battery translation
-        var batteryInt = data[1].toInt()
-        if (data[1] < 0) {
-            batteryInt = data[1] + 256
-        }
+        val batteryInt = data[1].unsigned()
         battery = java.lang.Byte.parseByte(Integer.toHexString(batteryInt).substring(0, 1))
 
         //Inputs translation

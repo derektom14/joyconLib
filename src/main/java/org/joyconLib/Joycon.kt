@@ -227,14 +227,7 @@ class Joycon (joyconId: Short) {
                         } else if (id.toInt() == 33) {
                             if (data[12].toInt() == -112) {
                                 for (i in 19..36) {
-                                    val c: Int
-                                    val b = data[i]
-                                    if (b < 0) {
-                                        c = b + 256
-                                    } else {
-                                        c = b.toInt()
-                                    }
-                                    factory_stick_cal[i - 19] = c
+                                    factory_stick_cal[i - 19] = data[i].unsigned()
                                 }
                             }
                         }
