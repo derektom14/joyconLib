@@ -5,6 +5,7 @@
  */
 package org.joyconLib
 
+import java.awt.geom.Point2D
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -14,17 +15,7 @@ import java.math.RoundingMode
  */
 class JoyconStickCalc {
 
-    var horizontal: Float = 0.toFloat()
-        private set
-    var vertical: Float = 0.toFloat()
-        private set
-
-    init {
-        horizontal = 0.0f
-        vertical = 0.0f
-    }
-
-    fun analogStickCalc(x: Int, y: Int, x_calc: IntArray, y_calc: IntArray) {
+    fun analogStickCalc(x: Int, y: Int, x_calc: IntArray, y_calc: IntArray): Point2D.Float {
         var x = x
         var y = y
         val xF: Float
@@ -63,13 +54,7 @@ class JoyconStickCalc {
             vert = 0.0f
         }
 
-        var bdHori = BigDecimal(hori.toDouble())
-        bdHori = bdHori.setScale(2, RoundingMode.HALF_EVEN)
-        var bdVert = BigDecimal(vert.toDouble())
-        bdVert = bdVert.setScale(2, RoundingMode.HALF_EVEN)
-
-        horizontal = bdHori.toFloat()
-        vertical = bdVert.toFloat()
+        return Point2D.Float(hori, vert)
     }
 
 }

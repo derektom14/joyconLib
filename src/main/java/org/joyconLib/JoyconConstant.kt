@@ -18,6 +18,7 @@ object JoyconConstant {
     val MANUFACTURER = "Nintendo"
     val JOYCON_LEFT: Short = 0x2006
     val JOYCON_RIGHT: Short = 0x2007
+    val PRO_CONTROLLER: Short = 0x2009
 
     //Shared Values
     val MINUS = "MINUS"

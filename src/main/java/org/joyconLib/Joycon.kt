@@ -28,19 +28,15 @@ import purejavahidapi.PureJavaHidApi
 class Joycon(joyconId: Short) {
 
     protected var j_Open: Boolean = false
-    protected var j_Listener: ((JoyconEvent) -> Unit)? = null
+    protected var j_Listener: ((ControllerOutput) -> Unit)? = null
     private var joyconInfo: HidDeviceInfo? = null
     private var joycon: HidDevice? = null
-    private var translator: JoyconTranslator? = null
+    private var translator: ControllerTranslator? = null
     private var calculator: JoyconStickCalc? = null
     private val factory_stick_cal = IntArray(18)
 
     init {
-        if (joyconId == JoyconConstant.JOYCON_LEFT || joyconId == JoyconConstant.JOYCON_RIGHT) {
             initialize(joyconId)
-        } else {
-            println("Wrong joycon id!\nPlease use 'JoyconConstant.JOYCON_RIGHT' or 'JoyconConstant.JOYCON_LEFT'")
-        }
     }
 
     /**
@@ -48,7 +44,7 @@ class Joycon(joyconId: Short) {
      *
      * @param li The listener, specify null to remove it
      */
-    fun setListener(listener: (JoyconEvent) -> Unit) {
+    fun setListener(listener: (ControllerOutput) -> Unit) {
         j_Listener = listener
     }
 
@@ -76,14 +72,15 @@ class Joycon(joyconId: Short) {
         val calculator = JoyconStickCalc()
         this.calculator = calculator
         val type = when (joyconId) {
-            JoyconConstant.JOYCON_LEFT -> JoyconType.LEFT
-            JoyconConstant.JOYCON_RIGHT -> JoyconType.RIGHT
-            else -> throw IllegalArgumentException()
+            JoyconConstant.JOYCON_LEFT -> ControllerType.LEFT
+            JoyconConstant.JOYCON_RIGHT -> ControllerType.RIGHT
+            else -> ControllerType.PRO
         }
-        translator = JoyconTranslator(type, calculator)
+        translator = ControllerTranslator(calculator)
         println("Listing Hid devices...")
         val list = PureJavaHidApi.enumerateDevices()
         for (info in list) {
+            println("Device info: ${info.manufacturerString}, ${info.vendorId}, ${info.productId}")
             if (info.manufacturerString == JoyconConstant.MANUFACTURER && info.vendorId == JoyconConstant.VENDOR_ID && info.productId == joyconId) {
                 println("Found a Nintendo gear!\nConecting...")
                 joyconInfo = info
@@ -194,21 +191,12 @@ class Joycon(joyconId: Short) {
                     private var horizontal = 0f
                     private var vertical = 0f
 
+                    private var lastData: ControllerOutput? = null
                     override fun onInputReport(source: HidDevice, id: Byte, data: ByteArray, len: Int) {
                         //Input code case
                         if (id.toInt() == 0x30) {
-                            translator!!.translate(data)
-                            val newInputs = translator!!.inputs
-                            val horizontal = translator!!.horizontal
-                            val vertical = translator!!.vertical
-                            val battery = translator!!.battery
-                            if (j_Listener != null) {
-                                if (!newInputs.isEmpty() || horizontal != this.horizontal || vertical != this.vertical) {
-                                    j_Listener!!(JoyconEvent(newInputs, horizontal, vertical, battery))
-                                    this.horizontal = horizontal
-                                    this.vertical = vertical
-                                }
-                            }
+                            val newData = translator!!.translate(data)
+                            j_Listener?.invoke(newData)
                             //Subcommand code case
                         } else if (id.toInt() == 33) {
                             if (data[12].toInt() == -112) {
