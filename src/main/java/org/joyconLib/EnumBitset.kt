@@ -55,11 +55,11 @@ class EnumBitset<E: Enum<E>>(private val bitSet: BitSet, private val enums: Arra
         return bitSet.isEmpty
     }
 
-    fun difference(other: EnumBitset<E>): EnumBitset<E> {
+    operator fun minus(other: EnumBitset<E>): EnumBitset<E> {
         return combineWith(other, BitSet::andNot)
     }
 
-    fun plusAll(other: EnumBitset<E>): EnumBitset<E> {
+    operator fun plus(other: EnumBitset<E>): EnumBitset<E> {
         return combineWith(other, BitSet::or)
     }
 

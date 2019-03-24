@@ -1,9 +1,14 @@
 package org.joyconLib
 
 import io.reactivex.BackpressureStrategy
+import io.reactivex.Completable
+import io.reactivex.CompletableEmitter
+import io.reactivex.Emitter
 import io.reactivex.Observable
 import io.reactivex.Scheduler
+import io.reactivex.SingleEmitter
 import io.reactivex.functions.BiFunction
+import io.reactivex.subjects.CompletableSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import purejavahidapi.HidDevice
@@ -23,7 +28,7 @@ class SwitchControllerImpl(
             JoyconConstant.PRO_CONTROLLER -> SwitchControllerType.PRO_CONTROLLER
             else -> SwitchControllerType.UNKNOWN
         }
-    private val translator: SwitchControllerTranslator = SwitchControllerTranslator(JoyconStickCalc())
+    private val translator: SwitchControllerTranslator = SwitchControllerTranslator(JoyconStickCalc(), type)
 
     private val reportSubject: Subject<ByteArray> = PublishSubject.create()
 
@@ -62,11 +67,13 @@ class SwitchControllerImpl(
                 .toFlowable(BackpressureStrategy.BUFFER)
                 .zipWith<Long, ByteArray>(Observable.interval(16, TimeUnit.MILLISECONDS).toFlowable(BackpressureStrategy.LATEST), BiFunction { s: ByteArray, _: Long -> s})
                 .observeOn(scheduler)
-                .subscribe { device.setOutputReport(1, it, 16)}
+                .subscribe {
+                    device.setOutputReport(1, it, 16)
+                }
     }
 
     override fun toString(): String {
-        return device.hidDeviceInfo.manufacturerString + " "  + device.hidDeviceInfo.productId + " " + type
+        return "$type:${device.hidDeviceInfo.deviceId}"
     }
 
     override fun setToHidMode() {
@@ -180,10 +187,8 @@ class SwitchControllerImpl(
     }
 
     private fun sendReport(vararg bytes: Pair<Int, Byte>) {
-        val ids: Byte = 1
         val datat = ByteArray(16)
         bytes.forEach { (i, value) -> datat[i] = value }
-
         reportSubject.onNext(datat)
     }
 

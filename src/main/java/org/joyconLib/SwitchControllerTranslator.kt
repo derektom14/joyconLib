@@ -4,7 +4,8 @@ import java.awt.geom.Point2D
 import java.util.*
 
 class SwitchControllerTranslator(
-        private val calculator: JoyconStickCalc
+        private val calculator: JoyconStickCalc,
+        private val type: SwitchControllerType
 ) {
 
     private var stickCalcXL = IntArray(3)
@@ -36,8 +37,15 @@ class SwitchControllerTranslator(
 
     fun translate(dataBytes: ByteArray): SwitchControllerOutput {
 
-        val leftStick = translateStick(dataBytes.sliceArray(5..7).map { it.toUByte().toInt() }, stickCalcXL, stickCalcYL)
-        val rightStick = translateStick(dataBytes.sliceArray(8..10).map{ it.toUByte().toInt() }, stickCalcXR, stickCalcYR)
+        val leftStick = when (type) {
+            SwitchControllerType.RIGHT_JOYCON -> null
+            else -> translateStick(dataBytes.sliceArray(5..7).map { it.toUByte().toInt() }, stickCalcXL, stickCalcYL)
+        }
+
+        val rightStick = when (type) {
+            SwitchControllerType.LEFT_JOYCON -> null
+            else -> translateStick(dataBytes.sliceArray(8..10).map{ it.toUByte().toInt() }, stickCalcXR, stickCalcYR)
+        }
 
         val bitSet = BitSet.valueOf(dataBytes.slice(2..4).toByteArray())
         bitSet.clear(SwitchButton.UNKNOWN_1.ordinal)

@@ -12,11 +12,11 @@ private val CONTROLLER_IDS = listOf(JoyconConstant.JOYCON_LEFT, JoyconConstant.J
 /**
  * Will connect to controllers when created, then make them available as they're registered.
  */
-
+@ExperimentalUnsignedTypes
 fun pollDevices(
         acceptDeviceId: (String) -> Boolean = { true },
         scheduler: Scheduler = Schedulers.io()
-): List<SwitchControllerImpl> {
+): List<SwitchController> {
     return PureJavaHidApi.enumerateDevices()
             .map { println(it.manufacturerString + " " + it.deviceId); it }
             .filter { it ->

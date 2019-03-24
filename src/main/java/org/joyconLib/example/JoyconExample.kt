@@ -22,7 +22,7 @@ import org.joyconLib.SwitchControllerOutput
  */
 fun main(args: Array<String>) {
     //Create a new Joycon with the identifier of the left joycon
-    val joycon = Joycon(JoyconConstant.PRO_CONTROLLER)
+    val joycon = Joycon(JoyconConstant.JOYCON_LEFT)
 
     var oldData: SwitchControllerOutput? = null
     //Set the listener for the Joycon and create a new Listener on the go

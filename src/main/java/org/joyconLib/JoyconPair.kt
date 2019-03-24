@@ -1,9 +1,10 @@
 package org.joyconLib
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
-class JoyconPair(
+data class JoyconPair(
         private val left: SwitchController,
         private val right: SwitchController
 ) : SwitchController {
@@ -20,7 +21,7 @@ class JoyconPair(
     override val output: Observable<SwitchControllerOutput>
         get() = Observable.combineLatest(left.output, right.output, BiFunction { leftOutput, rightOutput ->
             SwitchControllerOutput(
-                    leftOutput.buttons.plusAll(rightOutput.buttons),
+                    leftOutput.buttons + rightOutput.buttons,
                     leftOutput.battery + rightOutput.battery,
                     leftOutput.leftStick,
                     rightOutput.rightStick
@@ -58,12 +59,14 @@ class JoyconPair(
     }
 
     override fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
-        if (sides.contains(Side.LEFT)) {
-            left.vibrate(frequencies, amplitude, Side.LEFT)
-        }
-        if (sides.contains(Side.RIGHT)) {
-            right.vibrate(frequencies, amplitude, Side.RIGHT)
-        }
+        left.vibrate(frequencies, amplitude, *sides)
+        right.vibrate(frequencies, amplitude, *sides)
+//        if (sides.contains(Side.LEFT)) {
+//            left.vibrate(frequencies, amplitude, Side.LEFT)
+//        }
+//        if (sides.contains(Side.RIGHT)) {
+//            right.vibrate(frequencies, amplitude, Side.RIGHT)
+//        }
     }
 
     override fun endVibration(vararg sides: Side) {

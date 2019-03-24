@@ -1,5 +1,6 @@
 package org.joyconLib
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 
 interface SwitchController {

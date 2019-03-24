@@ -71,7 +71,7 @@ class Joycon(joyconId: Short) {
             JoyconConstant.JOYCON_RIGHT -> SwitchControllerType.RIGHT_JOYCON
             else -> SwitchControllerType.PRO_CONTROLLER
         }
-        translator = SwitchControllerTranslator(calculator)
+        translator = SwitchControllerTranslator(calculator, type)
         println("Listing Hid devices...")
         val list = PureJavaHidApi.enumerateDevices()
         for (info in list) {
@@ -198,6 +198,7 @@ class Joycon(joyconId: Short) {
                             //Subcommand code case
                         } else if (id.toInt() == 33) {
                             if (data[12].toInt() == -112) {
+                                println("Got calibration data")
                                 for (i in 19..36) {
                                     factory_stick_cal[i - 19] = data[i].toUByte().toInt()
                                 }
