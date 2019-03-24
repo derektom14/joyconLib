@@ -3,7 +3,7 @@ package org.joyconLib
 import java.awt.geom.Point2D
 import java.util.*
 
-class ControllerTranslator(
+class SwitchControllerTranslator(
         private val calculator: JoyconStickCalc
 ) {
 
@@ -28,21 +28,23 @@ class ControllerTranslator(
         stickCalcYR[2] = stickCalcYR[1] + (calibration[17] shl 4 or (calibration[16] shr 4))
     }
 
-    private fun translateStick(data: IntArray, stickCalcX: IntArray, stickCalcY: IntArray): Point2D.Float {
+    private fun translateStick(data: List<Int>, stickCalcX: IntArray, stickCalcY: IntArray): Point2D.Float {
         val x = data[0] or (data[1] and 0xF shl 8)
         val y = data[1] shr 4 or (data[2] shl 4)
         return calculator.analogStickCalc(x, y, stickCalcX, stickCalcY)
     }
 
-    fun translate(dataBytes: ByteArray): ControllerOutput {
+    fun translate(dataBytes: ByteArray): SwitchControllerOutput {
 
-        val data = dataBytes.asSequence().map { it.unsigned() }.toList().toIntArray()
+        val leftStick = translateStick(dataBytes.sliceArray(5..7).map { it.toUByte().toInt() }, stickCalcXL, stickCalcYL)
+        val rightStick = translateStick(dataBytes.sliceArray(8..10).map{ it.toUByte().toInt() }, stickCalcXR, stickCalcYR)
 
-        val leftStick = translateStick(data.sliceArray(5..7), stickCalcXL, stickCalcYL)
-        val rightStick = translateStick(data.sliceArray(8..10), stickCalcXR, stickCalcYR)
+        val bitSet = BitSet.valueOf(dataBytes.slice(2..4).toByteArray())
+        bitSet.clear(SwitchButton.UNKNOWN_1.ordinal)
+        bitSet.clear(SwitchButton.UNKNOWN_2.ordinal)
 
-        return ControllerOutput(
-                BitSet.valueOf(dataBytes.slice(2..4).toByteArray()),
+        return SwitchControllerOutput(
+                EnumBitset(bitSet, SwitchButton.values()),
                 battery = dataBytes[1].toInt(),
                 leftStick = leftStick,
                 rightStick = rightStick

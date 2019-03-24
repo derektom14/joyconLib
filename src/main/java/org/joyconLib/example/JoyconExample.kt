@@ -7,7 +7,7 @@ package org.joyconLib.example
 
 import org.joyconLib.Joycon
 import org.joyconLib.JoyconConstant
-import org.joyconLib.ControllerOutput
+import org.joyconLib.SwitchControllerOutput
 
 /**
  * **The example of the JoyconLib**
@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
     //Create a new Joycon with the identifier of the left joycon
     val joycon = Joycon(JoyconConstant.PRO_CONTROLLER)
 
-    var oldData: ControllerOutput? = null
+    var oldData: SwitchControllerOutput? = null
     //Set the listener for the Joycon and create a new Listener on the go
     joycon.setListener { je ->
         //Override the method to do what you want with the inputs

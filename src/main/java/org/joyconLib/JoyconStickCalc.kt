@@ -6,8 +6,6 @@
 package org.joyconLib
 
 import java.awt.geom.Point2D
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 /**
  *

@@ -1,6 +1,14 @@
 package org.joyconLib
 
-/**
- * Converts a byte into a [0-255] integer
- */
-fun Byte.unsigned(): Int = if (this < 0) this.toInt() + 256 else this.toInt()
+fun Float.clamp(min: Float, max: Float): Float {
+    return when {
+        this < min -> min
+        this > max -> max
+        else -> this
+    }
+}
+
+fun Double.roundToInt() = Math.round(this).toInt()
+
+fun UShort.lowerByte() = this.toUByte()
+fun UShort.upperByte() = (this / 256u).toUByte()

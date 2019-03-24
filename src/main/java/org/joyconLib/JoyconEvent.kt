@@ -5,8 +5,6 @@
  */
 package org.joyconLib
 
-import java.util.HashMap
-
 /**
  * **The object that will be sent when an input is triggered**
  *

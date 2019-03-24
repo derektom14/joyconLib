@@ -1,0 +1,61 @@
+package org.joyconLib
+
+import java.util.Arrays
+import java.util.BitSet
+import java.util.function.Consumer
+
+class EnumBitset<E: Enum<E>>(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
+    override val size: Int
+        get() = bitSet.cardinality()
+
+    override fun iterator(): Iterator<E> {
+        return object : AbstractIterator<E>() {
+            var index = -1
+            override fun computeNext() {
+                index = bitSet.nextSetBit(index + 1)
+                if (index >= bitSet.length() || index < 0) {
+                    done()
+                } else {
+                    setNext(enums[index])
+                }
+            }
+        }
+    }
+
+    override fun contains(element: E): Boolean {
+        return bitSet.get(element.ordinal)
+    }
+
+    override fun containsAll(elements: Collection<E>): Boolean {
+        return if (elements is EnumBitset) {
+            val combined = (bitSet.clone() as BitSet).apply { or(elements.bitSet) }
+            bitSet.cardinality() == combined.cardinality()
+        } else {
+            super.containsAll(elements)
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is EnumBitset<*>) {
+            other.bitSet == this.bitSet && Arrays.equals(other.enums, this.enums)
+        } else {
+            super.equals(other)
+        }
+    }
+
+    override fun forEach(action: Consumer<in E>?) {
+        var i = bitSet.nextSetBit(0)
+        while (i != -1) {
+            action!!.accept(enums[i])
+            i = bitSet.nextSetBit(i + 1)
+        }
+    }
+
+    override fun isEmpty(): Boolean {
+        return bitSet.isEmpty
+    }
+
+    fun difference(other: EnumBitset<E>): EnumBitset<E> {
+        return EnumBitset(bitSet.clone().let { it as BitSet }.apply { andNot(other.bitSet) }, enums)
+    }
+}

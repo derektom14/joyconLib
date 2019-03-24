@@ -1,0 +1,28 @@
+package org.joyconLib
+
+enum class SwitchButton {
+    Y,
+    X,
+    B,
+    A,
+    SR_R,
+    SL_R,
+    R,
+    ZR,
+    MINUS,
+    PLUS,
+    RIGHT_STICK,
+    LEFT_STICK,
+    HOME,
+    CAPTURE,
+    UNKNOWN_1,
+    UNKNOWN_2,
+    DOWN,
+    UP,
+    RIGHT,
+    LEFT,
+    SR_L,
+    SL_L,
+    L,
+    ZL,
+}
