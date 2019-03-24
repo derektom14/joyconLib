@@ -1,8 +1,6 @@
 package org.joyconLib
 
-enum class ControllerType {
+enum class Side {
     LEFT,
     RIGHT,
-    PRO
-    ;
 }

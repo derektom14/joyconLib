@@ -62,11 +62,11 @@ object JoyconConstant {
     val UP_ON = 2
     val UP_OFF = -UP_ON
 
-    val RIGHT = "RIGHT"
+    val RIGHT = "RIGHT_JOYCON"
     val RIGHT_ON = 4
     val RIGHT_OFF = -RIGHT_ON
 
-    val LEFT = "LEFT"
+    val LEFT = "LEFT_JOYCON"
     val LEFT_ON = 8
     val LEFT_OFF = -LEFT_ON
 

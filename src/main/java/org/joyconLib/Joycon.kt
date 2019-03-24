@@ -67,9 +67,9 @@ class Joycon(joyconId: Short) {
         val calculator = JoyconStickCalc()
         this.calculator = calculator
         val type = when (joyconId) {
-            JoyconConstant.JOYCON_LEFT -> ControllerType.LEFT
-            JoyconConstant.JOYCON_RIGHT -> ControllerType.RIGHT
-            else -> ControllerType.PRO
+            JoyconConstant.JOYCON_LEFT -> SwitchControllerType.LEFT_JOYCON
+            JoyconConstant.JOYCON_RIGHT -> SwitchControllerType.RIGHT_JOYCON
+            else -> SwitchControllerType.PRO_CONTROLLER
         }
         translator = SwitchControllerTranslator(calculator)
         println("Listing Hid devices...")

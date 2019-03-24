@@ -56,6 +56,14 @@ class EnumBitset<E: Enum<E>>(private val bitSet: BitSet, private val enums: Arra
     }
 
     fun difference(other: EnumBitset<E>): EnumBitset<E> {
-        return EnumBitset(bitSet.clone().let { it as BitSet }.apply { andNot(other.bitSet) }, enums)
+        return combineWith(other, BitSet::andNot)
+    }
+
+    fun plusAll(other: EnumBitset<E>): EnumBitset<E> {
+        return combineWith(other, BitSet::or)
+    }
+
+    private inline fun combineWith(other: EnumBitset<E>, combine: BitSet.(BitSet) -> Unit): EnumBitset<E> {
+        return EnumBitset(bitSet.clone().let { it as BitSet }.apply { this.combine(other.bitSet) }, enums)
     }
 }

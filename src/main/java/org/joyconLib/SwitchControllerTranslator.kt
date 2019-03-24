@@ -45,7 +45,7 @@ class SwitchControllerTranslator(
 
         return SwitchControllerOutput(
                 EnumBitset(bitSet, SwitchButton.values()),
-                battery = dataBytes[1].toInt(),
+                battery = listOf(dataBytes[1].toInt()),
                 leftStick = leftStick,
                 rightStick = rightStick
         )
