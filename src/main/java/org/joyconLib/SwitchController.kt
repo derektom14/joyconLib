@@ -1,23 +1,34 @@
 package org.joyconLib
 
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.functions.BiFunction
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import purejavahidapi.HidDevice
 import purejavahidapi.InputReportListener
 import java.util.concurrent.TimeUnit
 
 class SwitchController(
-        private val device: HidDevice
+        private val device: HidDevice,
+        scheduler: Scheduler
 ) {
-    var listener: (SwitchControllerOutput) -> Unit = { }
-    val translator: SwitchControllerTranslator = SwitchControllerTranslator(JoyconStickCalc())
 
-    init {
+    private val translator: SwitchControllerTranslator = SwitchControllerTranslator(JoyconStickCalc())
+
+    private val reportSubject: Subject<ByteArray> = PublishSubject.create()
+
+    val output = Observable.create<SwitchControllerOutput> { emitter ->
         device.inputReportListener = object : InputReportListener {
 
             override fun onInputReport(source: HidDevice, id: Byte, data: ByteArray, len: Int) {
                 //Input code case
                 if (id.toInt() == 0x30) {
                     val newData = translator.translate(data)
-                    listener.invoke(newData)
+                    if (!emitter.isDisposed) {
+                        emitter.onNext(newData)
+                    }
                     //Subcommand code case
                 } else if (id.toInt() == 33) {
                     if (data[12].toInt() == -112) {
@@ -30,6 +41,14 @@ class SwitchController(
                 }
             }
         }
+    }.share()
+
+    init {
+        reportSubject
+                .toFlowable(BackpressureStrategy.BUFFER)
+                .zipWith<Long, ByteArray>(Observable.interval(16, TimeUnit.MILLISECONDS).toFlowable(BackpressureStrategy.LATEST), BiFunction { s: ByteArray, _: Long -> s})
+                .observeOn(scheduler)
+                .subscribe { device.setOutputReport(1, it, 16)}
     }
 
     override fun toString(): String {
@@ -60,7 +79,7 @@ class SwitchController(
         sendReport(9 to 0x48, 10 to 0x00)
     }
 
-    fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float, time: Long, unit: TimeUnit) {
+    fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float) {
         if (amplitude == 0.0f) {
             endVibration()
         } else {
@@ -88,7 +107,8 @@ class SwitchController(
                 report[it+2] = rumbleData[2]
                 report[it+3] = rumbleData[3]
             }
-            device.setOutputReport(1, report.toByteArray(), 16)
+
+            reportSubject.onNext(report.toByteArray())
 
         }
     }
@@ -159,7 +179,8 @@ class SwitchController(
         val ids: Byte = 1
         val datat = ByteArray(16)
         bytes.forEach { (i, value) -> datat[i] = value }
-        device.setOutputReport(ids, datat, 16)
+
+        reportSubject.onNext(datat)
     }
 
     fun setPlayerLight(i: Int) {

@@ -49,7 +49,6 @@ class SwitchControllerTranslator(
                 leftStick = leftStick,
                 rightStick = rightStick
         )
-
     }
 
 }

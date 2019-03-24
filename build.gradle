@@ -35,6 +35,10 @@ dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'])
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.7'
+    // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxkotlin
+    compile group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.0.0'
+
 }
 
 jar {
