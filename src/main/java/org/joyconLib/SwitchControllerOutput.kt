@@ -12,7 +12,7 @@ data class SwitchControllerOutput(
 ) {
     companion object {
         val EMPTY = SwitchControllerOutput(
-                EnumBitset(BitSet(), SwitchButton.values()),
+                enumBitsetOf(BitSet()),
                 listOf(),
                 Point2D.Float(),
                 Point2D.Float()

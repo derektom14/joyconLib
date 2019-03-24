@@ -11,6 +11,7 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.CompletableSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
+import org.joyconLib.SwitchButton.*
 import purejavahidapi.HidDevice
 import purejavahidapi.InputReportListener
 import java.util.concurrent.TimeUnit
@@ -61,6 +62,44 @@ class SwitchControllerImpl(
             }
         }
     }.share()
+
+
+    override val horizontalOutput: Observable<SwitchControllerOutput>
+        get() = output.map {
+            when (type) {
+                SwitchControllerType.LEFT_JOYCON -> SwitchControllerOutput(mapFromLeft(it.buttons), it.battery, it.leftStick?.rotateLeft90(), null)
+                SwitchControllerType.RIGHT_JOYCON -> SwitchControllerOutput(mapFromRight(it.buttons), it.battery, it.rightStick?.rotateRight90(), null)
+                else -> it
+            }
+        }
+
+    private fun mapFromLeft(buttons: EnumBitset<SwitchButton>): EnumBitset<SwitchButton> {
+        return buttons.map {
+            when (it) {
+                RIGHT -> X
+                UP -> Y
+                LEFT -> B
+                DOWN -> A
+                SL_L -> L
+                SR_L -> R
+                else -> it
+            }
+        }.toEnumBitset()
+    }
+
+    private fun mapFromRight(buttons: EnumBitset<SwitchButton>): EnumBitset<SwitchButton> {
+        return buttons.map {
+            when (it) {
+                Y -> X
+                B -> Y
+                A -> B
+                X -> A
+                SL_R -> L
+                SR_R -> R
+                else -> it
+            }
+        }.toEnumBitset()
+    }
 
     init {
         reportSubject

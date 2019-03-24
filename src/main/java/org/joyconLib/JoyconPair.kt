@@ -28,6 +28,9 @@ data class JoyconPair(
             )
         })
 
+    override val horizontalOutput: Observable<SwitchControllerOutput>
+        get() = output
+
     override fun setToHidMode() {
         left.setToHidMode()
         right.setToHidMode()

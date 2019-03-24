@@ -52,7 +52,7 @@ class SwitchControllerTranslator(
         bitSet.clear(SwitchButton.UNKNOWN_2.ordinal)
 
         return SwitchControllerOutput(
-                EnumBitset(bitSet, SwitchButton.values()),
+                        enumBitsetOf<SwitchButton>(bitSet),
                 battery = listOf(dataBytes[1].toInt()),
                 leftStick = leftStick,
                 rightStick = rightStick

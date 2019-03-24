@@ -4,7 +4,7 @@ import java.util.Arrays
 import java.util.BitSet
 import java.util.function.Consumer
 
-class EnumBitset<E: Enum<E>>(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
+class EnumBitset<E: Enum<E>> constructor(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
     override val size: Int
         get() = bitSet.cardinality()
 
@@ -66,4 +66,13 @@ class EnumBitset<E: Enum<E>>(private val bitSet: BitSet, private val enums: Arra
     private inline fun combineWith(other: EnumBitset<E>, combine: BitSet.(BitSet) -> Unit): EnumBitset<E> {
         return EnumBitset(bitSet.clone().let { it as BitSet }.apply { this.combine(other.bitSet) }, enums)
     }
+}
+
+inline fun <reified E: Enum<E>>enumBitsetOf(bitSet: BitSet) = EnumBitset(bitSet, E::class.java.enumConstants)
+
+inline fun <reified E : Enum<E>> Iterable<E>.toEnumBitset(): EnumBitset<E> {
+    val enums = E::class.java.enumConstants
+    val bitSet = BitSet(enums.size)
+    forEach { bitSet.set(it.ordinal) }
+    return EnumBitset(bitSet, enums)
 }

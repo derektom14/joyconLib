@@ -5,6 +5,7 @@ import io.reactivex.Observable
 
 interface SwitchController {
     val output: Observable<SwitchControllerOutput>
+    val horizontalOutput: Observable<SwitchControllerOutput>
     val type: SwitchControllerType
     fun setToHidMode()
     fun setToNormalInputMode()

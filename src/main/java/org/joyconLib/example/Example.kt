@@ -1,24 +1,13 @@
 package org.joyconLib.example
 
-import com.google.common.base.Optional
-import io.reactivex.Maybe
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import org.joyconLib.JoyconPair
 import org.joyconLib.Side
-import org.joyconLib.SwitchButton
 import org.joyconLib.SwitchButton.*
-import org.joyconLib.SwitchController
 import org.joyconLib.SwitchControllerOutput
-import org.joyconLib.SwitchControllerType
 import org.joyconLib.differences
 import org.joyconLib.getPairedSwitchControllers
 import org.joyconLib.getSwitchControllers
-import org.joyconLib.pollDevices
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 
 @ExperimentalUnsignedTypes
@@ -31,7 +20,7 @@ fun main() {
             .getPairedSwitchControllers { it.vibrate(160f to 320f, 0.3f) }
             .doOnNext { println("Paired controller: $it") }
             .flatMap { controller ->
-                controller.output
+                controller.horizontalOutput
                         .startWith(SwitchControllerOutput.EMPTY)
                         .differences()
                         .doOnNext {
