@@ -1,11 +1,13 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
+import com.derekpeirce.switchcontroller.util.EnumBitSet
+import com.derekpeirce.switchcontroller.util.enumBitsetOf
 import io.reactivex.Observable
 import java.awt.geom.Point2D
 import java.util.BitSet
 
 data class SwitchControllerOutput(
-        val buttons: EnumBitset<SwitchButton>,
+        val buttons: EnumBitSet<SwitchButton>,
         val battery: List<Int>,
         val leftStick: Point2D.Float?,
         val rightStick: Point2D.Float?

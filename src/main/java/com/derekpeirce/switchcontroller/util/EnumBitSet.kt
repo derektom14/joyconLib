@@ -1,10 +1,9 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller.util
 
-import java.util.Arrays
 import java.util.BitSet
 import java.util.function.Consumer
 
-class EnumBitset<E: Enum<E>> constructor(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
+class EnumBitSet<E: Enum<E>> constructor(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
     override val size: Int
         get() = bitSet.cardinality()
 
@@ -27,19 +26,11 @@ class EnumBitset<E: Enum<E>> constructor(private val bitSet: BitSet, private val
     }
 
     override fun containsAll(elements: Collection<E>): Boolean {
-        return if (elements is EnumBitset) {
+        return if (elements is EnumBitSet) {
             val combined = (bitSet.clone() as BitSet).apply { or(elements.bitSet) }
             bitSet.cardinality() == combined.cardinality()
         } else {
             super.containsAll(elements)
-        }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is EnumBitset<*>) {
-            other.bitSet == this.bitSet && Arrays.equals(other.enums, this.enums)
-        } else {
-            super.equals(other)
         }
     }
 
@@ -55,24 +46,24 @@ class EnumBitset<E: Enum<E>> constructor(private val bitSet: BitSet, private val
         return bitSet.isEmpty
     }
 
-    operator fun minus(other: EnumBitset<E>): EnumBitset<E> {
+    operator fun minus(other: EnumBitSet<E>): EnumBitSet<E> {
         return combineWith(other, BitSet::andNot)
     }
 
-    operator fun plus(other: EnumBitset<E>): EnumBitset<E> {
+    operator fun plus(other: EnumBitSet<E>): EnumBitSet<E> {
         return combineWith(other, BitSet::or)
     }
 
-    private inline fun combineWith(other: EnumBitset<E>, combine: BitSet.(BitSet) -> Unit): EnumBitset<E> {
-        return EnumBitset(bitSet.clone().let { it as BitSet }.apply { this.combine(other.bitSet) }, enums)
+    private inline fun combineWith(other: EnumBitSet<E>, combine: BitSet.(BitSet) -> Unit): EnumBitSet<E> {
+        return EnumBitSet(bitSet.clone().let { it as BitSet }.apply { this.combine(other.bitSet) }, enums)
     }
 }
 
-inline fun <reified E: Enum<E>>enumBitsetOf(bitSet: BitSet) = EnumBitset(bitSet, E::class.java.enumConstants)
+inline fun <reified E: Enum<E>>enumBitsetOf(bitSet: BitSet) = EnumBitSet(bitSet, E::class.java.enumConstants)
 
-inline fun <reified E : Enum<E>> Iterable<E>.toEnumBitset(): EnumBitset<E> {
+inline fun <reified E : Enum<E>> Iterable<E>.toEnumBitset(): EnumBitSet<E> {
     val enums = E::class.java.enumConstants
     val bitSet = BitSet(enums.size)
     forEach { bitSet.set(it.ordinal) }
-    return EnumBitset(bitSet, enums)
+    return EnumBitSet(bitSet, enums)
 }

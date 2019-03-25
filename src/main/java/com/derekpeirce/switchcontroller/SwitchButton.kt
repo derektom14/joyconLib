@@ -1,4 +1,4 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
 enum class SwitchButton {
     Y,

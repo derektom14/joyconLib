@@ -1,6 +1,5 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
@@ -51,33 +50,33 @@ data class JoyconPair(
         right.setLightsOff()
     }
 
-    override fun enableVibration() {
-        left.enableVibration()
-        right.enableVibration()
+    override fun enableRumble() {
+        left.enableRumble()
+        right.enableRumble()
     }
 
-    override fun disableVibration() {
-        left.disableVibration()
-        right.disableVibration()
+    override fun disableRumble() {
+        left.disableRumble()
+        right.disableRumble()
     }
 
-    override fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
-        left.vibrate(frequencies, amplitude, *sides)
-        right.vibrate(frequencies, amplitude, *sides)
+    override fun rumble(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
+        left.rumble(frequencies, amplitude, *sides)
+        right.rumble(frequencies, amplitude, *sides)
 //        if (sides.contains(Side.LEFT)) {
-//            left.vibrate(frequencies, amplitude, Side.LEFT)
+//            left.rumble(frequencies, amplitude, Side.LEFT)
 //        }
 //        if (sides.contains(Side.RIGHT)) {
-//            right.vibrate(frequencies, amplitude, Side.RIGHT)
+//            right.rumble(frequencies, amplitude, Side.RIGHT)
 //        }
     }
 
-    override fun endVibration(vararg sides: Side) {
+    override fun endRumble(vararg sides: Side) {
         if (sides.contains(Side.LEFT)) {
-            left.endVibration(Side.LEFT)
+            left.endRumble(Side.LEFT)
         }
         if (sides.contains(Side.RIGHT)) {
-            right.endVibration(Side.RIGHT)
+            right.endRumble(Side.RIGHT)
         }
     }
 

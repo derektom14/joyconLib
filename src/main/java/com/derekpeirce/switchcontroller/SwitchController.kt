@@ -1,4 +1,4 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -11,10 +11,10 @@ interface SwitchController {
     fun setToNormalInputMode()
     fun setLightsBlinking()
     fun setLightsOff()
-    fun enableVibration()
-    fun disableVibration()
-    fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side = Side.values())
-    fun endVibration(vararg sides: Side = Side.values())
+    fun enableRumble()
+    fun disableRumble()
+    fun rumble(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side = Side.values())
+    fun endRumble(vararg sides: Side = Side.values())
     fun calibrate()
     fun setPlayerLight(i: Int)
 }

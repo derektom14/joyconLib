@@ -1,13 +1,13 @@
-package org.joyconLib.example
+package com.derekpeirce.switchcontroller.example
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import org.joyconLib.Side
-import org.joyconLib.SwitchButton.*
-import org.joyconLib.SwitchControllerOutput
-import org.joyconLib.differences
-import org.joyconLib.getPairedSwitchControllers
-import org.joyconLib.getSwitchControllers
+import com.derekpeirce.switchcontroller.Side
+import com.derekpeirce.switchcontroller.SwitchButton.*
+import com.derekpeirce.switchcontroller.SwitchControllerOutput
+import com.derekpeirce.switchcontroller.differences
+import com.derekpeirce.switchcontroller.getPairedSwitchControllers
+import com.derekpeirce.switchcontroller.getSwitchControllers
 import java.util.concurrent.TimeUnit
 
 @ExperimentalUnsignedTypes
@@ -17,7 +17,7 @@ fun main() {
             .observeOn(Schedulers.io())
             .getSwitchControllers()
             .doOnNext { println("Found controller: $it") }
-            .getPairedSwitchControllers { it.vibrate(160f to 320f, 0.3f) }
+            .getPairedSwitchControllers { it.rumble(160f to 320f, 0.3f) }
             .doOnNext { println("Paired controller: $it") }
             .flatMap { controller ->
                 controller.horizontalOutput
@@ -26,12 +26,12 @@ fun main() {
                         .doOnNext {
                             println("Output change for controller $controller: $it")
                             when (it.checkButton(X)) {
-                                true -> controller.vibrate(160f to 320f, 0.5f, Side.RIGHT)
-                                false -> controller.endVibration(Side.RIGHT)
+                                true -> controller.rumble(160f to 320f, 0.5f, Side.RIGHT)
+                                false -> controller.endRumble(Side.RIGHT)
                             }
                             when (it.checkButton(UP)) {
-                                true -> controller.vibrate(160f to 320f, 0.5f, Side.LEFT)
-                                false -> controller.endVibration(Side.LEFT)
+                                true -> controller.rumble(160f to 320f, 0.5f, Side.LEFT)
+                                false -> controller.endRumble(Side.LEFT)
                             }
                         }
             }

@@ -1,4 +1,4 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
 import com.google.common.base.Optional
 import io.reactivex.Maybe
@@ -9,7 +9,15 @@ import purejavahidapi.PureJavaHidApi
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
-private val CONTROLLER_IDS = listOf(JoyconConstant.JOYCON_LEFT, JoyconConstant.JOYCON_RIGHT, JoyconConstant.PRO_CONTROLLER)
+private fun controllerType(productId: Short) = when (productId.toInt()) {
+    0x2006 -> SwitchControllerType.LEFT_JOYCON
+    0x2007 -> SwitchControllerType.RIGHT_JOYCON
+    0x2009 -> SwitchControllerType.PRO_CONTROLLER
+    else -> null
+}
+
+private val VENDOR_ID: Short = 0x057E
+private val MANUFACTURER = "Nintendo"
 
 /**
  * Whenever this observable emits a value, triggers a check for any new controllers.
@@ -21,10 +29,14 @@ fun Observable<*>.getSwitchControllers(): Observable<out SwitchController> {
         Observable.fromIterable(PureJavaHidApi.enumerateDevices())
     }
             .distinct { Pair(it.deviceId, it.productId) }
-            .filter {
-                JoyconConstant.MANUFACTURER.equals(it.manufacturerString) && it.vendorId == JoyconConstant.VENDOR_ID && CONTROLLER_IDS.contains(it.productId)
+            .flatMapMaybe {
+                if ("Nintendo".equals(it.manufacturerString) && it.vendorId == 0x057E.toShort()) {
+                    controllerType(it.productId)?.let { type -> Maybe.just(type to it) } ?: Maybe.empty()
+                } else {
+                    Maybe.empty()
+                }
             }
-            .map { SwitchControllerImpl(PureJavaHidApi.openDevice(it), Schedulers.io()) }
+            .map { (type, device) -> SwitchControllerImpl(PureJavaHidApi.openDevice(device), type, Schedulers.io()) }
 }
 
 fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int = 4, onPair: (SwitchController) -> Unit): Observable<SwitchController> {
@@ -52,6 +64,7 @@ fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int
         it.setToHidMode()
         it.setLightsBlinking()
         it.calibrate()
+        it.enableRumble()
         it.setToNormalInputMode()
         it.output
                 .distinctUntilChanged()

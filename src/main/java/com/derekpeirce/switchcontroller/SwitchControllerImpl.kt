@@ -1,17 +1,16 @@
-package org.joyconLib
+package com.derekpeirce.switchcontroller
 
 import io.reactivex.BackpressureStrategy
-import io.reactivex.Completable
-import io.reactivex.CompletableEmitter
-import io.reactivex.Emitter
 import io.reactivex.Observable
 import io.reactivex.Scheduler
-import io.reactivex.SingleEmitter
 import io.reactivex.functions.BiFunction
-import io.reactivex.subjects.CompletableSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
-import org.joyconLib.SwitchButton.*
+import com.derekpeirce.switchcontroller.SwitchButton.*
+import com.derekpeirce.switchcontroller.util.EnumBitSet
+import com.derekpeirce.switchcontroller.util.rotateLeft90
+import com.derekpeirce.switchcontroller.util.rotateRight90
+import com.derekpeirce.switchcontroller.util.toEnumBitset
 import purejavahidapi.HidDevice
 import purejavahidapi.InputReportListener
 import java.util.concurrent.TimeUnit
@@ -19,17 +18,11 @@ import java.util.concurrent.TimeUnit
 @ExperimentalUnsignedTypes
 class SwitchControllerImpl(
         private val device: HidDevice,
+        override val type: SwitchControllerType,
         scheduler: Scheduler
 ) : SwitchController {
 
-    override val type: SwitchControllerType
-        get() = when(device.hidDeviceInfo.productId) {
-            JoyconConstant.JOYCON_LEFT -> SwitchControllerType.LEFT_JOYCON
-            JoyconConstant.JOYCON_RIGHT -> SwitchControllerType.RIGHT_JOYCON
-            JoyconConstant.PRO_CONTROLLER -> SwitchControllerType.PRO_CONTROLLER
-            else -> SwitchControllerType.UNKNOWN
-        }
-    private val translator: SwitchControllerTranslator = SwitchControllerTranslator(JoyconStickCalc(), type)
+    private val translator: SwitchControllerTranslator = SwitchControllerTranslator(type)
 
     private val reportSubject: Subject<ByteArray> = PublishSubject.create()
 
@@ -73,7 +66,7 @@ class SwitchControllerImpl(
             }
         }
 
-    private fun mapFromLeft(buttons: EnumBitset<SwitchButton>): EnumBitset<SwitchButton> {
+    private fun mapFromLeft(buttons: EnumBitSet<SwitchButton>): EnumBitSet<SwitchButton> {
         return buttons.map {
             when (it) {
                 RIGHT -> X
@@ -87,7 +80,7 @@ class SwitchControllerImpl(
         }.toEnumBitset()
     }
 
-    private fun mapFromRight(buttons: EnumBitset<SwitchButton>): EnumBitset<SwitchButton> {
+    private fun mapFromRight(buttons: EnumBitSet<SwitchButton>): EnumBitSet<SwitchButton> {
         return buttons.map {
             when (it) {
                 Y -> X
@@ -131,36 +124,20 @@ class SwitchControllerImpl(
         sendReport(9 to 0x30, 10 to 0b0000_0000)
     }
 
-    override fun enableVibration() {
+    override fun enableRumble() {
         sendReport(9 to 0x48, 10 to 0x01)
     }
 
-    override fun disableVibration() {
+    override fun disableRumble() {
         sendReport(9 to 0x48, 10 to 0x00)
     }
 
-    override fun vibrate(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
+    override fun rumble(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
         if (sides.isEmpty()) return
         if (amplitude == 0.0f) {
-            endVibration()
+            endRumble()
         } else {
-            val lowFreq = frequencies.first.clamp(40.875885f, 626.286133f)
-            val amp = amplitude.clamp(0.0f, 1.0f)
-            val highFreq = frequencies.second.clamp(81.75177f, 1252.572266f)
-            val hfBinary = ((Math.round(32f * Math.log(highFreq * 0.1)) - 0x60) * 4).toUShort()
-            val lfByte = (Math.round(32f * Math.log(lowFreq * 0.1)) - 0x40).toUByte()
-            val hfAmp = when {
-                amp < 0.117 -> (((Math.log(amp.toDouble() * 1000) * 32) - 0x60) / (5 - (amp * amp)) - 1)
-                amp < 0.23 -> (((Math.log(amp.toDouble() * 1000) * 32) - 0x60) - 0x5c)
-                else -> ((((Math.log(amp.toDouble() * 1000) * 32) - 0x60) * 2) - 0xf6)
-            }.toInt().toUByte()
-            val lfAmp = calcLfAmp(hfAmp)
-            val rumbleData = ubyteArrayOf(
-                    hfBinary.lowerByte(),
-                    (hfBinary.upperByte() + hfAmp).toUByte(),
-                    (lfByte + lfAmp.upperByte()).toUByte(),
-                    lfAmp.lowerByte()
-            )
+            val rumbleData = rumbleData(frequencies, amplitude)
             val report = UByteArray(16)
             sides.map {
                 when(it) {
@@ -179,20 +156,7 @@ class SwitchControllerImpl(
         }
     }
 
-    private fun calcLfAmp(hfAmp: UByte): UShort {
-        var amp = (hfAmp.toInt() * 0.5).toInt() // using integer because unsigned
-        val parity = amp % 2
-        if (parity > 0) {
-            amp -= 1
-        }
-        amp = (amp / 2) + 0x40
-        if (parity > 0) {
-            amp = amp or 0x8000
-        }
-        return amp.toUShort()
-    }
-
-    override fun endVibration(vararg sides: Side) {
+    override fun endRumble(vararg sides: Side) {
         val left = if (sides.contains(Side.LEFT)) {
             listOf<Pair<Int, Byte>>(
                     1 to 0x0,
