@@ -17,8 +17,11 @@ fun main() {
             .observeOn(Schedulers.io())
             .getSwitchControllers()
             .doOnNext { println("Found controller: $it") }
-            .getPairedSwitchControllers { it.rumble(160f to 320f, 0.3f) }
-            .doOnNext { println("Paired controller: $it") }
+            .getPairedSwitchControllers()
+            .doOnNext {
+                it.rumble(160f to 320f, 0.3f)
+                println("Paired controller: $it")
+            }
             .flatMap { controller ->
                 controller.horizontalOutput
                         .startWith(SwitchControllerOutput.EMPTY)

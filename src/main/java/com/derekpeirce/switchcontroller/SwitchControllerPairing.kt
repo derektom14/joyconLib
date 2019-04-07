@@ -39,7 +39,7 @@ fun Observable<*>.getSwitchControllers(): Observable<out SwitchController> {
             .map { (type, device) -> SwitchControllerImpl(PureJavaHidApi.openDevice(device), type, Schedulers.io()) }
 }
 
-fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int = 4, onPair: (SwitchController) -> Unit): Observable<SwitchController> {
+fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int = 4): Observable<SwitchController> {
 
     val pairingButtons = listOf(setOf(SwitchButton.L, SwitchButton.R), setOf(SwitchButton.SL_L, SwitchButton.SR_L), setOf(SwitchButton.SL_R, SwitchButton.SR_R))
     val joyconLs = ConcurrentLinkedQueue<SwitchController>()
@@ -82,7 +82,6 @@ fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int
                 .flatMap { it.orNull()?.let { Maybe.just(it) } ?: Maybe.empty() }
     }.zipWith<Int, SwitchController> (Observable.fromIterable(0 until numPairings), BiFunction { controller, index ->
         controller.setPlayerLight(index)
-        onPair(controller)
         controller
      })
 }
