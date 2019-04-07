@@ -16,8 +16,8 @@ private fun controllerType(productId: Short) = when (productId.toInt()) {
     else -> null
 }
 
-private val VENDOR_ID: Short = 0x057E
-private val MANUFACTURER = "Nintendo"
+private const val VENDOR_ID: Short = 0x057E
+private const val MANUFACTURER = "Nintendo"
 
 /**
  * Whenever this observable emits a value, triggers a check for any new controllers.
@@ -30,7 +30,7 @@ fun Observable<*>.getSwitchControllers(): Observable<out SwitchController> {
     }
             .distinct { Pair(it.deviceId, it.productId) }
             .flatMapMaybe {
-                if ("Nintendo".equals(it.manufacturerString) && it.vendorId == 0x057E.toShort()) {
+                if (MANUFACTURER == it.manufacturerString && it.vendorId == VENDOR_ID) {
                     controllerType(it.productId)?.let { type -> Maybe.just(type to it) } ?: Maybe.empty()
                 } else {
                     Maybe.empty()
