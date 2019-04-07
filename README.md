@@ -1,8 +1,10 @@
 # joyconLib
-A java library for the nintendo joy-con
+A Java/Kotlin library to connect with Nintendo Switch controllers.
 
-Test [here](https://github.com/Virus57000/joyconLib-Test)
+Currently supports pairing controllers, receiving button presses, and setting
+controller lights and rumble.
 
-Wiki is comming soon ;)
+Uses convenient RxJava streams.
 
-Follow the changelog [here](https://gbatemp.net/threads/joycon-api-for-java.491262/)
+A fork from [elgoupil's repo](https://github.com/elgoupil/joyconLib),
+refactored with more convenient interfaces and Pro Controller support.
