@@ -4,6 +4,10 @@ import com.derekpeirce.switchcontroller.util.clamp
 import com.derekpeirce.switchcontroller.util.lowerByte
 import com.derekpeirce.switchcontroller.util.upperByte
 
+/**
+ * Translates a description of a desired rumble into the bytes to be sent to the controller.
+ * Logic copied from: https://github.com/Looking-Glass/JoyconLib/blob/73dc8f7293ba4ef2c6bc543d77dbf4c32e787aa6/Packages/com.lookingglass.joyconlib/JoyconLib_scripts/Joycon.cs
+ */
 @ExperimentalUnsignedTypes
 fun rumbleData(frequencies: Pair<Float, Float>, amplitude: Float): UByteArray {
     val lowFreq = frequencies.first.clamp(40.875885f, 626.286133f)

@@ -3,6 +3,10 @@ package com.derekpeirce.switchcontroller
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 
+/**
+ * A [SwitchController] that's formed from a pair of Joycons. Button output from the two Joycons are combined into
+ * a single controller, as if they were a Pro controller.
+ */
 data class JoyconPair(
         private val left: SwitchController,
         private val right: SwitchController
@@ -61,14 +65,12 @@ data class JoyconPair(
     }
 
     override fun rumble(frequencies: Pair<Float, Float>, amplitude: Float, vararg sides: Side) {
-        left.rumble(frequencies, amplitude, *sides)
-        right.rumble(frequencies, amplitude, *sides)
-//        if (sides.contains(Side.LEFT)) {
-//            left.rumble(frequencies, amplitude, Side.LEFT)
-//        }
-//        if (sides.contains(Side.RIGHT)) {
-//            right.rumble(frequencies, amplitude, Side.RIGHT)
-//        }
+        if (sides.contains(Side.LEFT)) {
+            left.rumble(frequencies, amplitude, Side.LEFT)
+        }
+        if (sides.contains(Side.RIGHT)) {
+            right.rumble(frequencies, amplitude, Side.RIGHT)
+        }
     }
 
     override fun endRumble(vararg sides: Side) {

@@ -9,10 +9,9 @@ import com.derekpeirce.switchcontroller.util.clamp
 import java.awt.geom.Point2D
 
 /**
- *
- * @author Administrateur
+ * Calculates a Joystick's true position.
+ * The only class left essentially unchanged from the original fork
  */
-
 fun analogStickCalc(xIn: Int, yIn: Int, xCalibration: IntArray, yCalibration: IntArray): Point2D.Float {
     val deadZoneCenter = 0.15f
     val deadZoneOuter = 0.10f

@@ -10,6 +10,12 @@ import com.derekpeirce.switchcontroller.getPairedSwitchControllers
 import com.derekpeirce.switchcontroller.getSwitchControllers
 import java.util.concurrent.TimeUnit
 
+/**
+ * An example for connecting to Switch controllers.
+ * It demonstrates how to poll all switch controllers (refreshing every 5 seconds),
+ * then wait for those controllers to pair via L+R pressing.
+ * It also demonstrates checking for button presses and releases, and rumbling the controller.
+ */
 @ExperimentalUnsignedTypes
 fun main() {
 

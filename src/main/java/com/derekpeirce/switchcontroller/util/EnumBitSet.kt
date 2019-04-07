@@ -3,6 +3,10 @@ package com.derekpeirce.switchcontroller.util
 import java.util.BitSet
 import java.util.function.Consumer
 
+/**
+ * A set that, like [java.util.EnumSet], uses a bit set to track enums in a set, but in this case
+ * directly wraps around a [BitSet] for efficiency
+ */
 class EnumBitSet<E: Enum<E>> constructor(private val bitSet: BitSet, private val enums: Array<E>) : AbstractSet<E>() {
     override val size: Int
         get() = bitSet.cardinality()

@@ -39,6 +39,12 @@ fun Observable<*>.getSwitchControllers(): Observable<out SwitchController> {
             .map { (type, device) -> SwitchControllerImpl(PureJavaHidApi.openDevice(device), type, Schedulers.io()) }
 }
 
+/**
+ * From the input stream of controllers, emits the first [numPairings] controllers for which L and R are pressed together,
+ * labeled with the corresponding player number.
+ * A single Joycon may be paired by pressing SL and SR.
+ * Two Joycons may be paired as a single controller by pressing L and R on the respective Joycon.
+ */
 fun Observable<out SwitchController>.getPairedSwitchControllers(numPairings: Int = 4): Observable<SwitchController> {
 
     val pairingButtons = listOf(setOf(SwitchButton.L, SwitchButton.R), setOf(SwitchButton.SL_L, SwitchButton.SR_L), setOf(SwitchButton.SL_R, SwitchButton.SR_R))

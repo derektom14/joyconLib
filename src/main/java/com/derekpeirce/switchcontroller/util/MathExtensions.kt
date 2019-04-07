@@ -23,8 +23,6 @@ fun Byte.unsigned(): Int = when {
     else -> this.toInt()
 }
 
-fun Double.roundToInt() = Math.round(this).toInt()
-
 @ExperimentalUnsignedTypes
 fun UShort.lowerByte() = this.toUByte()
 @ExperimentalUnsignedTypes

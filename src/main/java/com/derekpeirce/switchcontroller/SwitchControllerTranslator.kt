@@ -5,6 +5,9 @@ import com.derekpeirce.switchcontroller.util.unsigned
 import java.awt.geom.Point2D
 import java.util.BitSet
 
+/**
+ * Translates raw data from a controller into button presses, battery levels, and Joystick positions
+ */
 class SwitchControllerTranslator(
         private val type: SwitchControllerType
 ) {
