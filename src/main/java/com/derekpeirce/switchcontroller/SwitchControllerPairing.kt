@@ -20,6 +20,14 @@ private const val VENDOR_ID: Short = 0x057E
 private const val MANUFACTURER = "Nintendo"
 
 /**
+ * Emits all Switch controller devices currently connected to this system.
+ */
+@ExperimentalUnsignedTypes
+fun getSwitchControllers(): Observable<out SwitchController> {
+    return Observable.just(Unit).getSwitchControllers()
+}
+
+/**
  * Whenever this observable emits a value, triggers a check for any new controllers.
  * A controller that has been discovered will not be emitted again.
  */

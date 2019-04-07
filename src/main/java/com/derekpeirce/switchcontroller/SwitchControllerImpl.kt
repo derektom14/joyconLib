@@ -11,6 +11,8 @@ import com.derekpeirce.switchcontroller.util.EnumBitSet
 import com.derekpeirce.switchcontroller.util.rotateLeft90
 import com.derekpeirce.switchcontroller.util.rotateRight90
 import com.derekpeirce.switchcontroller.util.toEnumBitset
+import io.reactivex.disposables.Disposables
+import purejavahidapi.DeviceRemovalListener
 import purejavahidapi.HidDevice
 import purejavahidapi.InputReportListener
 import java.util.concurrent.TimeUnit
@@ -27,33 +29,35 @@ class SwitchControllerImpl(
     private val reportSubject: Subject<ByteArray> = PublishSubject.create()
 
     override val output = Observable.create<SwitchControllerOutput> { emitter ->
-        device.inputReportListener = object : InputReportListener {
-
-            override fun onInputReport(source: HidDevice, id: Byte, data: ByteArray, len: Int) {
-                //Input code case
-                if (id.toInt() == 0x30) {
-                    val newData = translator.translate(data)
-                    if (!emitter.isDisposed) {
-                        emitter.onNext(newData)
+        device.inputReportListener = InputReportListener { source, id, data, len ->
+            //Input code case
+            if (id.toInt() == 0x30) {
+                val newData = translator.translate(data)
+                if (!emitter.isDisposed) {
+                    emitter.onNext(newData)
+                }
+                //Subcommand code case
+            } else if (id.toInt() == 33) {
+                if (data[12].toInt() == -112) {
+                    val factory_stick_cal = IntArray(18)
+                    for (i in 19..36) {
+                        factory_stick_cal[i - 19] = data[i].toUByte().toInt()
                     }
-                    //Subcommand code case
-                } else if (id.toInt() == 33) {
-                    if (data[12].toInt() == -112) {
-                        val factory_stick_cal = IntArray(18)
-                        for (i in 19..36) {
-                            factory_stick_cal[i - 19] = data[i].toUByte().toInt()
-                        }
-                        translator.calibrate(factory_stick_cal)
-                    }
+                    translator.calibrate(factory_stick_cal)
                 }
             }
         }
 
-        device.setDeviceRemovalListener {
+        device.deviceRemovalListener = DeviceRemovalListener {
             if (!emitter.isDisposed) {
                 emitter.onComplete()
             }
         }
+
+        emitter.setDisposable(Disposables.fromAction {
+            device.inputReportListener = null
+            device.deviceRemovalListener = null
+        })
     }.share()
 
 
